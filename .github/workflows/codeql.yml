@@ -16,8 +16,8 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
-  # schedule:
-  #   - cron: '37 18 * * 6'
+  schedule:
+    - cron: '37 18 * * 6'
 
 jobs:
   analyze:
@@ -88,7 +88,11 @@ jobs:
     - if: matrix.build-mode == 'manual'
       shell: bash
       run: |
-        cd examples/kotlin
+        cd java
+        ./gradlew :client:buildAll
+        cd ../examples/java
+        ./gradlew build
+        cd ../kotlin
         ./gradlew build
 
     - name: Perform CodeQL Analysis
