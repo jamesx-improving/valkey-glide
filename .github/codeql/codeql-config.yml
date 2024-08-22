@@ -1,4 +1,2 @@
-paths:
-  - java
 paths-ignore:
   - 'examples/*'
