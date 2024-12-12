@@ -252,7 +252,7 @@ type SetCommands interface {
 	//   client.SAdd("test", []string{"one"})
 	//   response, err := client.SRandMember("test")
 	//   // response.Value() == "one"
-	//   // err == nil
+	//   // err: nil
 	//
 	// [valkey.io]: https://valkey.io/commands/srandmember/
 	SRandMember(key string) (Result[string], error)
