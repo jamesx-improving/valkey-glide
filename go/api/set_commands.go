@@ -274,7 +274,7 @@ type SetCommands interface {
 	//   // err == nil
 	//   value2, err := client.SPop("nonExistingSet")
 	//   // value2.IsNil() == true
-	//   // err == nil
+	//   // err: nil
 	//
 	// [valkey.io]: https://valkey.io/commands/spop/
 	SPop(key string) (Result[string], error)
