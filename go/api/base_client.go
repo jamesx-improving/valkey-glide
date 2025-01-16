@@ -20,9 +20,9 @@ import (
 	"strconv"
 	"unsafe"
 
-	"github.com/valkey-io/valkey-glide/go/api/options"
-	"github.com/valkey-io/valkey-glide/go/protobuf"
-	"github.com/valkey-io/valkey-glide/go/utils"
+	"github.com/jamesx-improving/valkey-glide/go/api/options"
+	"github.com/jamesx-improving/valkey-glide/go/protobuf"
+	"github.com/jamesx-improving/valkey-glide/go/utils"
 	"google.golang.org/protobuf/proto"
 )
 

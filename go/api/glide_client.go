@@ -11,7 +11,7 @@ package api
 import "C"
 
 import (
-	"github.com/valkey-io/valkey-glide/go/utils"
+	"github.com/jamesx-improving/valkey-glide/go/utils"
 )
 
 // GlideClient interface compliance check.
