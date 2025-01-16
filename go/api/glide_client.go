@@ -2,12 +2,18 @@
 
 package api
 
-// #cgo LDFLAGS: -L../target/release -lglide_rs
+// #cgo LDFLAGS: -lglide_rs
+// #cgo !windows LDFLAGS: -lm
+// #cgo darwin LDFLAGS: -framework Security
+// #cgo linux,amd64 LDFLAGS: -L${SRCDIR}/../rustbin/x86_64-unknown-linux-gnu
+// #cgo linux,arm64 LDFLAGS: -L${SRCDIR}/../rustbin/aarch64-unknown-linux-gnu
+// #cgo darwin,arm64 LDFLAGS: -L${SRCDIR}/../rustbin/aarch64-apple-darwin
+// #cgo LDFLAGS: -L../target/release
 // #include "../lib.h"
 import "C"
 
 import (
-	"github.com/valkey-io/valkey-glide/go/glide/utils"
+	"github.com/jamesx-improving/valkey-glide/go/utils"
 )
 
 // GlideClient interface compliance check.
