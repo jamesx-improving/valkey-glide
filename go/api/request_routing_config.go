@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/valkey-io/valkey-glide/go/glide/protobuf"
+	"github.com/valkey-io/valkey-glide/go/protobuf"
 )
 
 // Request routing basic interface. Please use one of the following:

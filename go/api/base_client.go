@@ -2,7 +2,11 @@
 
 package api
 
-// #cgo LDFLAGS: -L../target/release -lglide_rs
+// #cgo LDFLAGS: -lglide_rs
+// #cgo !windows LDFLAGS: -lm
+// #cgo linux, amd64 LDFLAGS: -L${SRCDIR}/../rustbin/x86_64-unknown-linux-gnu
+// #cgo linux, arm64 LDFLAGS: -L${SRCDIR}/../rustbin/aarch64-unknown-linux-gnu
+// #cgo darwin, arm64 LDFLAGS: -L${SRCDIR}/../rustbin/aarch64-apple-darwin
 // #include "../lib.h"
 //
 // void successCallback(void *channelPtr, struct CommandResponse *message);
@@ -16,9 +20,9 @@ import (
 	"strconv"
 	"unsafe"
 
-	"github.com/valkey-io/valkey-glide/go/glide/api/options"
-	"github.com/valkey-io/valkey-glide/go/glide/protobuf"
-	"github.com/valkey-io/valkey-glide/go/glide/utils"
+	"github.com/valkey-io/valkey-glide/go/api/options"
+	"github.com/valkey-io/valkey-glide/go/protobuf"
+	"github.com/valkey-io/valkey-glide/go/utils"
 	"google.golang.org/protobuf/proto"
 )
 

@@ -2,7 +2,7 @@
 
 package integTest
 
-import "github.com/valkey-io/valkey-glide/go/glide/api"
+import "github.com/valkey-io/valkey-glide/go/api"
 
 // check if sliceA is a subset of sliceB
 func isSubset(sliceA []api.Result[string], sliceB []api.Result[string]) bool {
