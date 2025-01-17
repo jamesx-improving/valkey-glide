@@ -48,8 +48,8 @@ build-glide-client:
 	cargo build --release
 	cbindgen --config cbindgen.toml --crate glide-rs --output lib.h --lang c
 	# TODO: handle build/copy/strip of all supported arch
-	cp -f target/release/libglide_rs.so rustbin/x86_64-unknown-linux-gnu/
-	strip --strip-unneeded rustbin/x86_64-unknown-linux-gnu/libglide_rs.so
+	cp -f target/release/libglide_rs.a rustbin/x86_64-unknown-linux-gnu/
+	strip --strip-unneeded rustbin/x86_64-unknown-linux-gnu/libglide_rs.a
 
 build-glide-client-debug:
 	cargo build
