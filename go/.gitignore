@@ -1,10 +1,10 @@
 # Go compilation files
-# *.pb.go
+*.pb.go
 
 reports
 
 # cbindgen generated header file
-# lib.h
+lib.h
 
 # benchmarking results
 benchmarks/results/**
