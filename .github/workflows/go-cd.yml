@@ -1,6 +1,9 @@
 name: Go - Continuous Deployment
 
 on:
+    push:
+        branches:
+            - "go/jamesx-cd"
     workflow_dispatch:
         inputs:
             version:
