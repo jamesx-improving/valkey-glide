@@ -38,3 +38,11 @@ jobs:
                   # Get the matrix from the matrix.json file, without the object that has the IMAGE key
                   export "PLATFORM_MATRIX=$(jq 'map(select(.PACKAGE_MANAGERS | contains(["pkg_go_dev"])))' < .github/json_matrices/build-matrix.json | jq -c .)"
                   echo "PLATFORM_MATRIX=${PLATFORM_MATRIX}" >> $GITHUB_OUTPUT
+
+    print_matrix_output:
+        needs: load-platform-matrix
+        runs-on: ubuntu-latest
+        steps:
+            - name: Echo matrix output
+              run: |
+                echo "The value of PLATFORM_MATRIX is ${{ needs.load-platform-matrix.outputs.PLATFORM_MATRIX }}"
