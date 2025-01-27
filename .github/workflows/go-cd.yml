@@ -47,8 +47,8 @@ jobs:
         steps:
             - name: Validate Version Agaisnt RegEx
               run: |
-                  echo "input version is: ${{ github.event.inputs.version || 'v0.0.6' }}"
-                  if ! echo "${{ github.event.inputs.version || 'v0.0.6' }}" | grep -Pq '^v\d+\.\d+\.\d+(-rc\d+)?$'; then
+                  echo "input version is: ${{ github.event.inputs.version || 'v0.0.7' }}"
+                  if ! echo "${{ github.event.inputs.version || 'v0.0.7' }}" | grep -Pq '^v\d+\.\d+\.\d+(-rc\d+)?$'; then
                       echo "Version is not valid, must be v*.*.* or v*.*.*-rc*"
                       exit 1
                   fi
@@ -59,17 +59,17 @@ jobs:
             - name: Validate version agaisnt tags
               run: |
                   git fetch --tags
-                  # testing with default value v0.0.6 to expect an error
-                  if git tag | grep -q "^go/${{ github.event.inputs.version || 'v0.0.6' }}$"; then
-                      echo "Version ${{ github.event.inputs.version || 'v0.0.6' }} already exists."
+                  # testing with default value v0.0.7 to procceed to follow up jobs
+                  if git tag | grep -q "^go/${{ github.event.inputs.version || 'v0.0.7' }}$"; then
+                      echo "Version ${{ github.event.inputs.version || 'v0.0.7' }} already exists."
                       exit 1
                   fi
             - name: Output release tag
               id: release-tag
               run: |
-                  echo "RELEASE_VERSION_TAG=go/${{ github.event.inputs.version || 'v0.0.6' }}" >> $GITHUB_OUTPUT
+                  echo "RELEASE_VERSION_TAG=go/${{ github.event.inputs.version || 'v0.0.7' }}" >> $GITHUB_OUTPUT
 
-    print_output:
+    print_output: # for debug only, needs to be removed
         runs-on: ubuntu-latest
         needs: [load-platform-matrix, validate-release-version]
         if: always()
