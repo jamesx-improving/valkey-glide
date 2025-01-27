@@ -47,7 +47,6 @@ jobs:
         steps:
             - name: Validate Version Agaisnt RegEx
               run: |
-                  # testing with default value v0.0.6 to expect an error
                   echo "input version is: ${{ github.event.inputs.version || 'v0.0.6' }}"
                   if ! echo "${{ github.event.inputs.version || 'v0.0.6' }}" | grep -Pq '^v\d+\.\d+\.\d+(-rc\d+)?$'; then
                       echo "Version is not valid, must be v*.*.* or v*.*.*-rc*"
@@ -60,14 +59,15 @@ jobs:
             - name: Validate version agaisnt tags
               run: |
                   git fetch --tags
-                  if git tag | grep -q "^v${{ github.event.inputs.version }}$"; then
-                      echo "Version v${{ github.event.inputs.version }} already exists."
+                  # testing with default value v0.0.6 to expect an error
+                  if git tag | grep -q "^v${{ github.event.inputs.version || 'v0.0.6' }}$"; then
+                      echo "Version v${{ github.event.inputs.version || 'v0.0.6' }} already exists."
                       exit 1
                   fi
             - name: Output release tag
               id: release-tag
               run: |
-                  echo "RELEASE_VERSION_TAG=go/${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+                  echo "RELEASE_VERSION_TAG=go/${{ github.event.inputs.version || 'v0.0.6' }}" >> $GITHUB_OUTPUT
 
     print_output:
         runs-on: ubuntu-latest
