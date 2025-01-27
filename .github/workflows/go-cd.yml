@@ -60,7 +60,7 @@ jobs:
               run: |
                   git fetch --tags
                   # testing with default value v0.0.6 to expect an error
-                  if git tag | grep -q "^${{ github.event.inputs.version || 'v0.0.6' }}$"; then
+                  if git tag | grep -q "^go/${{ github.event.inputs.version || 'v0.0.6' }}$"; then
                       echo "Version ${{ github.event.inputs.version || 'v0.0.6' }} already exists."
                       exit 1
                   fi
