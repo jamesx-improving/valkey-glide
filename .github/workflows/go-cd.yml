@@ -9,10 +9,12 @@ on:
             version:
                 description: "The release version of GLIDE, formatted as v*.*.* or v*.*.*-rc*"
                 required: true
+                default: "v0.0.6" # for testing, expecting error for this existing version/tag
             pkg_go_dev_publish:
                 description: "Publish to pkg.go.dev"
                 required: true
                 type: boolean
+                default: false
 
 concurrency:
     group: go-cd-${{ github.head_ref || github.ref }}
@@ -39,10 +41,40 @@ jobs:
                   export "PLATFORM_MATRIX=$(jq 'map(select(.PACKAGE_MANAGERS | contains(["pkg_go_dev"])))' < .github/json_matrices/build-matrix.json | jq -c .)"
                   echo "PLATFORM_MATRIX=${PLATFORM_MATRIX}" >> $GITHUB_OUTPUT
 
-    print_matrix_output:
-        needs: load-platform-matrix
+    validate-release-version:
+        runs-on: ubuntu-latest
+        outputs:
+            RELEASE_VERSION_TAG: ${{ steps.release-version.outputs.RELEASE_VERSION_TAG }}
+        steps:
+            - name: Validate Version Agaisnt RegEx
+              run: |
+                  if ! echo "${{ github.event.inputs.version }}" | grep -Pq '^v\d+\.\d+\.\d+(-rc\d+)?$'; then
+                      echo "Version is not valid, must be v*.*.* or v*.*.*-rc*"
+                      exit 1
+                  fi
+
+            - name: Checkout for tag check
+              uses: actions/checkout@v4
+
+            - name: Validate version agaisnt tags
+              run: |
+                  git fetch --tags
+                  if git tag | grep -q "^v${{ github.event.inputs.version }}$"; then
+                      echo "Version v${{ github.event.inputs.version }} already exists."
+                      exit 1
+                  fi
+            - name: Output release tag
+              id: release-tag
+              run: |
+                  echo "RELEASE_VERSION_TAG=go/${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+
+    print_output:
+        needs: [load-platform-matrix, validate-release-version]
         runs-on: ubuntu-latest
         steps:
-            - name: Echo matrix output
+            - name: Echo output
               run: |
                 echo "The value of PLATFORM_MATRIX is ${{ needs.load-platform-matrix.outputs.PLATFORM_MATRIX }}"
+                echo "The value of RELEASE_VERSION_TAG is ${{ needs.validate-release-version.outputs.RELEASE_VERSION_TAG}}"
+    # create-binaries-to-publish:
+        
