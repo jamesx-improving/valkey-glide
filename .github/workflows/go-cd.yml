@@ -48,6 +48,7 @@ jobs:
         steps:
             - name: Validate Version Agaisnt RegEx
               run: |
+                  echo "input version is: ${{ github.event.inputs.version }}"
                   if ! echo "${{ github.event.inputs.version }}" | grep -Pq '^v\d+\.\d+\.\d+(-rc\d+)?$'; then
                       echo "Version is not valid, must be v*.*.* or v*.*.*-rc*"
                       exit 1
