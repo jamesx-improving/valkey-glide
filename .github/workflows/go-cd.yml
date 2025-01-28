@@ -101,6 +101,8 @@ jobs:
                   fi
             - uses: actions/checkout@v4
             - uses: actions/setup-go@v5
+              with:
+                  go-version: '^1.22.0'
             - name: Install shared software dependencies
               uses: ./.github/workflows/install-shared-dependencies
               with:
@@ -117,6 +119,7 @@ jobs:
             - name: Build Go client
               working-directory: go
               run: |
+                  make install-build-tools
                   make build
                   strip $STRIP_FLAG target/release/libglide_rs.a
             - name: Upload artifacts
