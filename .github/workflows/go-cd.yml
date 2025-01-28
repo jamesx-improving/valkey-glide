@@ -78,5 +78,52 @@ jobs:
               run: |
                 echo "The value of PLATFORM_MATRIX is ${{ needs.load-platform-matrix.outputs.PLATFORM_MATRIX }}"
                 echo "The value of RELEASE_VERSION_TAG is ${{ needs.validate-release-version.outputs.RELEASE_VERSION_TAG}}"
-    # create-binaries-to-publish:
-        
+
+    create-binaries-to-publish:
+        needs: [load-platform-matrix, validate-release-version]
+        # TODO: change repository_owner to 'valkey-io' before merge to upstream
+        if: success() && github.repository_owner == 'jamesx-improving'
+        strategy:
+            fail-fast: false
+            matrix:
+                host: ${{ fromJson(needs.load-platform-matrix.outputs.PLATFORM_MATRIX)}}
+        runs-on: ${{ matrix.host.RUNNER}}
+        steps:
+            - name: Setup self-hosted runner access
+              run: |
+                  GHA_HOME=/home/ubuntu/actions-runner/_work/valkey-glide
+                  if [ -d $GHA_HOME ]; then
+                    sudo chown -R $USER:$USER $GHA_HOME
+                    sudo rm -rf $GHA_HOME
+                    mkdir -p $GHA_HOME/valkey-glide
+                  else
+                    echo "No cleaning needed"
+                  fi
+            - uses: actions/checkout@v4
+            - uses: actions/setup-go@v5
+            - name: Install shared software dependencies
+              uses: ./.github/workflows/install-shared-dependencies
+              with:
+                  os: ${{ matrix.host.OS }}
+                  target: ${{ matrix.host.TARGET }}
+                  github-token: ${{ secrets.GITHUB_TOKEN }}
+            - name: Set strip flag
+              run: |
+                if [[ "${{ matrix.host.OS }}" == "macos" ]]; then
+                    echo "STRIP_FLAG=-x" >> $GITHUB_ENV
+                else
+                    echo "STRIP_FLAG=--strip-unneeded" >> $GITHUB_ENV
+                fi
+            - name: Build Go client
+              working-directory: go
+              run: |
+                  make build
+                  strip $STRIP_FLAG target/release/libglide_rs.a
+            - name: Upload artifacts
+              continue-on-error: true
+              uses: actions/upload-artifact@v4
+              with:
+                  name: go-${{ matrix.host.TARGET }}
+                  path: |
+                      go/target/release/libglide_rs.a
+                      go/lib.h
