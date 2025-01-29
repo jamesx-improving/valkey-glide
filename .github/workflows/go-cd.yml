@@ -79,7 +79,7 @@ jobs:
                 echo "The value of PLATFORM_MATRIX is ${{ needs.load-platform-matrix.outputs.PLATFORM_MATRIX }}"
                 echo "The value of RELEASE_VERSION_TAG is ${{ needs.validate-release-version.outputs.RELEASE_VERSION_TAG}}"
 
-    create-binaries-to-publish:
+    create-binaries:
         needs: [load-platform-matrix, validate-release-version]
         # TODO: change repository_owner to 'valkey-io' before merge to upstream
         if: success() && github.repository_owner == 'jamesx-improving'
@@ -120,8 +120,10 @@ jobs:
               working-directory: go
               run: |
                   make install-build-tools
-                  make build
+                  make build-glide-client
                   strip $STRIP_FLAG target/release/libglide_rs.a
+                  # TODO: move generation of protobuf and header file to a non-matrix step
+                  make generate-protobuf
             - name: Upload artifacts
               continue-on-error: true
               uses: actions/upload-artifact@v4
@@ -130,3 +132,4 @@ jobs:
                   path: |
                       go/target/release/libglide_rs.a
                       go/lib.h
+                      go/protobuf/
