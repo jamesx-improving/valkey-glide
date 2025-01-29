@@ -6,6 +6,7 @@ install-build-tools:
 	cargo --version
 	echo "The rustc version is:"
 	rustc --version
+	cargo clean
 	cargo install cbindgen
 
 install-dev-tools-go1.20:
