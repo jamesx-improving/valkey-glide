@@ -2,11 +2,6 @@ SHELL:=/bin/bash
 
 install-build-tools:
 	go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.33.0
-	echo "The cargo version is:"
-	cargo --version
-	echo "The rustc version is:"
-	rustc --version
-	cargo clean
 	cargo install cbindgen
 
 install-dev-tools-go1.20:
