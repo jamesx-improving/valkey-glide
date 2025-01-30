@@ -25,7 +25,6 @@ permissions:
 jobs:
     load-platform-matrix:
         runs-on: ubuntu-latest
-        # environment: AWS_ACTIONS
         outputs:
             PLATFORM_MATRIX: ${{ steps.load-platform-matrix.outputs.PLATFORM_MATRIX }}
         steps:
@@ -69,7 +68,7 @@ jobs:
               run: |
                   echo "RELEASE_VERSION_TAG=go/${{ github.event.inputs.version || 'v0.0.7' }}" >> $GITHUB_OUTPUT
 
-    print_output: # for debug only, needs to be removed
+    print_output: # TODO: for debug only, needs to be removed
         runs-on: ubuntu-latest
         needs: [load-platform-matrix, validate-release-version]
         if: always()
@@ -128,14 +127,37 @@ jobs:
               continue-on-error: true
               uses: actions/upload-artifact@v4
               with:
-                  name: go-${{ matrix.host.TARGET }}
+                  name: ${{ matrix.host.TARGET }}
                   path: |
                       go/target/release/libglide_rs.a
                       go/lib.h
                       go/protobuf/
 
-    # commit-auto-gen-files-with-tag:
-    #     needs: create-binaries
-    #     runs-on: ubuntu-latest
-    #     steps:
-            
+    commit-auto-gen-files-with-tag:
+        needs: create-binaries
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/download-artifact@v4
+              with:
+                path: artifacts
+            - name: copy files
+              run: |
+                  cd artifacts
+                  for dir in */; do
+                    target_name=${dir%/}
+                    mkdir -p $GITHUB_WORKSPACE/go/rustbin/${target_name}
+                    cp ${target_name}/target/release/libglide_rs.a $GITHUB_WORKSPACE/go/rustbin/${target_name}/
+                  done
+                  # TODO: move generation of protobuf and header file to a non-matrix step
+                  cd x86_64-unknown-linux-gnu
+                  cp lib.h $GITHUB_WORKSPACE/go/
+                  mkdir -p $GITHUB_WORKSPACE/go/protobuf
+                  cp protobuf/* $GITHUB_WORKSPACE/go/protobuf/
+                  git config user.name github-actions
+                  git config user.email github-actions@github.com
+                  git add .
+                  git commit -m "Automated commit from GitHub Actions"
+                  # TODO: use actual version/tag
+                  git tag testing-tag-1
+                  git push origin testing-tag-1
