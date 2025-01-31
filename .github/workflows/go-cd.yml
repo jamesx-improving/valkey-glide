@@ -143,7 +143,7 @@ jobs:
             - uses: actions/download-artifact@v4
               with:
                 path: artifacts
-            - name: copy files
+            - name: Copy generated files to repo
               run: |
                   cd artifacts
                   for dir in */; do
@@ -156,7 +156,8 @@ jobs:
                   cp lib.h $GITHUB_WORKSPACE/go/
                   mkdir -p $GITHUB_WORKSPACE/go/protobuf
                   cp protobuf/* $GITHUB_WORKSPACE/go/protobuf/
-                  cd $GITHUB_WORKSPACE
+            - name: Commit and push tag
+              run: |
                   git config user.name github-actions
                   git config user.email github-actions@github.com
                   git add -f .
