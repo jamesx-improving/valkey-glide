@@ -136,6 +136,8 @@ jobs:
     commit-auto-gen-files-with-tag:
         needs: create-binaries
         runs-on: ubuntu-latest
+        permissions:
+            contents: write
         steps:
             - uses: actions/checkout@v4
             - uses: actions/download-artifact@v4
@@ -154,9 +156,10 @@ jobs:
                   cp lib.h $GITHUB_WORKSPACE/go/
                   mkdir -p $GITHUB_WORKSPACE/go/protobuf
                   cp protobuf/* $GITHUB_WORKSPACE/go/protobuf/
+                  cd $GITHUB_WORKSPACE
                   git config user.name github-actions
                   git config user.email github-actions@github.com
-                  git add .
+                  git add -f .
                   git commit -m "Automated commit from GitHub Actions"
                   # TODO: use actual version/tag
                   git tag testing-tag-1
