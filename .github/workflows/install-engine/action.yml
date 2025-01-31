@@ -45,8 +45,7 @@ runs:
               # check if the valkey repo is already cloned
               if [[ ! -d valkey ]]; then
                   git clone https://github.com/valkey-io/valkey.git
-                  git checkout ${{ inputs.engine-version }}
-                  git pull
+                  cd valkey
               else
                   # check if the branch=version is already checked out
                   if [[ $(git branch --show-current) != ${{ inputs.engine-version }} ]]; then
@@ -55,9 +54,9 @@ runs:
                       make distclean
                       sudo rm -rf /usr/local/bin/redis-* /usr/local/bin/valkey-* ./valkey-* ./redis-* ./dump.rdb
                       git fetch --all
-                      git checkout ${{ inputs.engine-version }}
-                      git pull
                   fi
+                  git checkout ${{ inputs.engine-version }}
+                  git pull
               fi
         # if no cache hit, build the engine
         - name: Build Valkey
