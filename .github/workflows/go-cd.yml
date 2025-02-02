@@ -196,6 +196,7 @@ jobs:
           os: ${{ matrix.host.OS }}
           target: ${{ matrix.host.TARGET }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          engine-version: "8.0"
       - name: test go at tag
         working-directory: go
         run: |
