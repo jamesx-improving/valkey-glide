@@ -47,9 +47,7 @@ clean:
 build-glide-client:
 	cargo build --release
 	cbindgen --config cbindgen.toml --crate glide-rs --output lib.h --lang c
-	# TODO: handle build/copy/strip of all supported arch
-	# cp -f target/release/libglide_rs.a rustbin/x86_64-unknown-linux-gnu/
-	# strip --strip-unneeded rustbin/x86_64-unknown-linux-gnu/libglide_rs.a
+	strip $(shell [ "$(uname)" = "Darwin" ] && echo -x || echo --strip-unneeded) target/release/libglide_rs.a
 
 build-glide-client-debug:
 	cargo build
@@ -84,7 +82,7 @@ format:
 unit-test:
 	mkdir -p reports
 	set -o pipefail; \
-	LD_LIBRARY_PATH=$(shell find . -name libglide_rs.so|grep -w release|tail -1|xargs dirname|xargs readlink -f):${LD_LIBRARY_PATH} \
+	LD_LIBRARY_PATH=$(shell find . -name libglide_rs.a|grep -w release|tail -1|xargs dirname|xargs readlink -f):${LD_LIBRARY_PATH} \
 	go test -v -race ./... -skip TestGlideTestSuite $(if $(test-filter), -run $(test-filter)) \
 	| tee >(go tool test2json -t -p github.com/jamesx-improving/valkey-glide/go/utils | go-test-report -o reports/unit-tests.html -t unit-test > /dev/null)
 
@@ -99,7 +97,7 @@ modules-test: __it
 __it:
 	mkdir -p reports
 	set -o pipefail; \
-	LD_LIBRARY_PATH=$(shell find . -name libglide_rs.so|grep -w release|tail -1|xargs dirname|xargs readlink -f):${LD_LIBRARY_PATH} \
+	LD_LIBRARY_PATH=$(shell find . -name libglide_rs.a|grep -w release|tail -1|xargs dirname|xargs readlink -f):${LD_LIBRARY_PATH} \
 	go test -v -race ./integTest/... \
 	$(TEST_FILTER) \
 	$(if $(filter true, $(tls)), --tls,) \

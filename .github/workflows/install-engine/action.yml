@@ -35,6 +35,7 @@ runs:
                   ~/valkey
               key: valkey-${{ inputs.engine-version }}-${{ inputs.target }}
 
+        # TODO: revert all self-hosted runner special logic before merge back to upstream
         # - name: Build Valkey for ARM
         #   if: ${{ contains(inputs.target, 'aarch64-unknown') }}
         #   shell: bash
