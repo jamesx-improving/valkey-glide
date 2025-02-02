@@ -47,7 +47,6 @@ clean:
 build-glide-client:
 	cargo build --release
 	cbindgen --config cbindgen.toml --crate glide-rs --output lib.h --lang c
-	# strip $(shell [ "$(uname)" = "Darwin" ] && echo -x || echo --strip-unneeded) target/release/libglide_rs.a
 	if [ "$$(uname)" = "Darwin" ]; then \
 		strip -x target/release/libglide_rs.a; \
 	else \

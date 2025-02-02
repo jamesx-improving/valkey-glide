@@ -197,5 +197,6 @@ jobs:
           target: ${{ matrix.host.TARGET }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: test go at tag
+        working-directory: go
         run: |
           make -k unit-test integ-test
