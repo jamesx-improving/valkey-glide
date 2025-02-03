@@ -43,6 +43,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       RELEASE_VERSION_TAG: ${{ steps.release-tag.outputs.RELEASE_VERSION_TAG }}
+      RELEASE_VERSION: ${{ steps.release-tag.outputs.RELEASE_VERSION }}
     steps:
       - name: Validate Version Agaisnt RegEx
         run: |
@@ -66,7 +67,9 @@ jobs:
       - name: Output release tag
         id: release-tag
         run: |
+          echo "RELEASE_VERSION=${{ github.event.inputs.version || 'v0.0.7' }}" >> $GITHUB_OUTPUT
           echo "RELEASE_VERSION_TAG=go/${{ github.event.inputs.version || 'v0.0.7' }}" >> $GITHUB_OUTPUT
+          
 
   print_output: # TODO: for debug only, needs to be removed
     runs-on: ubuntu-latest
@@ -158,7 +161,7 @@ jobs:
           git tag ${{ needs.validate-release-version.outputs.RELEASE_VERSION_TAG}}
           git push origin ${{ needs.validate-release-version.outputs.RELEASE_VERSION_TAG}}
           # TODO: change to valkey-io
-          GOPROXY=proxy.golang.org go list -m github.com/jamesx-improving/valkey-glide/${{ needs.validate-release-version.outputs.RELEASE_VERSION_TAG}}
+          GOPROXY=proxy.golang.org go list -m github.com/jamesx-improving/valkey-glide/go@${{ needs.validate-release-version.outputs.RELEASE_VERSION}}
 
   extra-post-commit-test:
     needs: [load-platform-matrix, validate-release-version, commit-auto-gen-files-with-tag]
