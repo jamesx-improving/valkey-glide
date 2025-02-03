@@ -200,6 +200,7 @@ jobs:
       - name: test go at tag
         working-directory: go
         run: |
-          make install-tools-go1.22.0 build
-          echo "LD_LIBRARY_PATH=$(readlink -f ./rustbin/${{ matrix.host.TARGET }}):$LD_LIBRARY_PATH" >> $GITHUB_ENV
+          make install-tools-go1.22.0
+          export LD_LIBRARY_PATH=$(readlink -f ./rustbin/${{ matrix.host.TARGET }})
+          echo $LD_LIBRARY_PATH
           make -k unit-test integ-test
