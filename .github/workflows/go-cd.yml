@@ -108,19 +108,11 @@ jobs:
           os: ${{ matrix.host.OS }}
           target: ${{ matrix.host.TARGET }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
-      # - name: Set strip flag
-      #   run: |
-      #     if [[ "${{ matrix.host.OS }}" == "macos" ]]; then
-      #         echo "STRIP_FLAG=-x" >> $GITHUB_ENV
-      #     else
-      #         echo "STRIP_FLAG=--strip-unneeded" >> $GITHUB_ENV
-      #     fi
       - name: Build Go client
         working-directory: go
         run: |
           make install-build-tools
           make build-glide-client
-          # strip $STRIP_FLAG target/release/libglide_rs.a
           # TODO: move generation of protobuf and header file to a non-matrix step
           make generate-protobuf
       - name: Upload artifacts
@@ -134,7 +126,7 @@ jobs:
             go/protobuf/
 
   commit-auto-gen-files-with-tag:
-    needs: create-binaries
+    needs: [validate-release-version, create-binaries]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -163,11 +155,13 @@ jobs:
           git add -f .
           git commit -m "Automated commit from GitHub Actions"
           # TODO: use actual version/tag
-          git tag testing-tag-1
-          git push origin testing-tag-1
+          git tag ${{ needs.validate-release-version.outputs.RELEASE_VERSION_TAG}}
+          git push origin ${{ needs.validate-release-version.outputs.RELEASE_VERSION_TAG}}
+          # TODO: change to valkey-io
+          GOPROXY=proxy.golang.org go list -m github.com/jamesx-improving/valkey-glide/${{ needs.validate-release-version.outputs.RELEASE_VERSION_TAG}}
 
   extra-post-commit-test:
-    needs: [load-platform-matrix, commit-auto-gen-files-with-tag]
+    needs: [load-platform-matrix, validate-release-version, commit-auto-gen-files-with-tag]
     strategy:
       fail-fast: false
       matrix:
@@ -186,7 +180,7 @@ jobs:
           fi
       - uses: actions/checkout@v4
         with:
-          ref: 'testing-tag-1'
+          ref: '${{ needs.validate-release-version.outputs.RELEASE_VERSION_TAG}}'
       - uses: actions/setup-go@v5
         with:
           go-version: "^1.22.0"
