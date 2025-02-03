@@ -201,6 +201,5 @@ jobs:
         working-directory: go
         run: |
           make install-tools-go1.22.0
-          export LD_LIBRARY_PATH=$(readlink -f ./rustbin/${{ matrix.host.TARGET }})
-          echo $LD_LIBRARY_PATH
+          # export LD_LIBRARY_PATH=$(readlink -f ./rustbin/${{ matrix.host.TARGET }})
           make -k unit-test integ-test
