@@ -200,14 +200,18 @@ jobs:
               working-directory: go/benchmarks
               run: |
                 # change go/benchmarks/go.mod on the fly
-                # remove replace (use published version)
-                echo "remove replace"
-                sed -i '/replace github\.com\/jamesx-improving\/valkey-glide\/go/d' go.mod
-                # change depending glide version to newly released version
-                echo "create escaped version"
                 export ESCAPED_VERSION=$(echo "${{ needs.validate-release-version.outputs.RELEASE_VERSION }}" | sed 's/\./\\./g')
-                echo "replace version"
-                sed -i "s/github\.com\/jamesx-improving\/valkey-glide\/go v0\.0\.0/github.com\/jamesx-improving\/valkey-glide\/go $ESCAPED_VERSION/g" go.mod
+                if [[ "${{ matrix.host.OS }}" == "macos" ]]; then
+                    echo "macos"
+                    sed -i '' '/replace github\.com\/jamesx-improving\/valkey-glide\/go/d' go.mod
+                    echo "replacing..."
+                    sed -i '' "s/github\.com\/jamesx-improving\/valkey-glide\/go v0\.0\.0/github.com\/jamesx-improving\/valkey-glide\/go $ESCAPED_VERSION/g" go.mod
+                else
+                    echo "linux"
+                    sed -i '/replace github\.com\/jamesx-improving\/valkey-glide\/go/d' go.mod
+                    echo "replacing..."
+                    sed -i "s/github\.com\/jamesx-improving\/valkey-glide\/go v0\.0\.0/github.com\/jamesx-improving\/valkey-glide\/go $ESCAPED_VERSION/g" go.mod
+                fi
                 echo "The content of go.mod:"
                 cat go.mod
                 echo "tidy"
