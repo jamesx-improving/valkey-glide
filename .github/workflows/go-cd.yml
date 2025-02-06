@@ -201,9 +201,14 @@ jobs:
               run: |
                 # change go/benchmarks/go.mod on the fly
                 # remove replace (use published version)
+                echo "remove replace"
                 sed -i '/replace github\.com\/valkey-io\/valkey-glide\/go/d' go.mod
                 # change depending glide version to newly released version
-                echo "ESCAPED_VERSION=$(echo '${{ needs.validate-release-version.outputs.RELEASE_VERSION }}' | tr '.' '\\.') " >> $GITHUB_ENV
-                sed -i "/github\.com\/valkey-io\/valkey-glide\/go v0\.0\.0/s/github.com\/valkey-io\/valkey-glide\/go $ESCAPED_VERSION/g" go.mod
+                echo "create escaped version"
+                export ESCAPED_VERSION=$(echo "${{ needs.validate-release-version.outputs.RELEASE_VERSION }}" | tr '.' '\\.')
+                echo "replace version"
+                sed -i "s/github\.com\/valkey-io\/valkey-glide\/go v0\.0\.0/github.com\/valkey-io\/valkey-glide\/go $ESCAPED_VERSION/g" go.mod
+                echo "tidy"
                 go mod tidy
+                echo "run"
                 go run . -minimal -clients glide -concurrentTasks 10 -port ${{ env.PORT }}
