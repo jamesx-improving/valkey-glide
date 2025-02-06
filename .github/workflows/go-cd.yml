@@ -197,9 +197,9 @@ jobs:
             - name: test newly released go client
               env:
                   PORT: ${{ steps.start-server.outputs.PORT }}
-              working-directory: go/benchmark
+              working-directory: go/benchmarks
               run: |
-                # change go/benchmark/go.mod on the fly
+                # change go/benchmarks/go.mod on the fly
                 # remove replace (use published version)
                 sed -i '/replace github.com/valkey-io/valkey-glide/go/d' go.mod
                 # change depending glide version to newly released version
