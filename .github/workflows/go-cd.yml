@@ -201,8 +201,8 @@ jobs:
               run: |
                 # change go/benchmarks/go.mod on the fly
                 # remove replace (use published version)
-                sed -i '/replace github.com/valkey-io/valkey-glide/go/d' go.mod
+                sed -i '/replace github.com\/valkey-io\/valkey-glide\/go/d' go.mod
                 # change depending glide version to newly released version
-                sed -i '/github.com/valkey-io/valkey-glide/go v0.0.0/s/github.com/valkey-io/valkey-glide/go ${{ needs.validate-release-version.outputs.RELEASE_VERSION }}/g' go.mod
+                sed -i '/github.com\/valkey-io\/valkey-glide\/go v0.0.0/s/github.com\/valkey-io\/valkey-glide\/go ${{ needs.validate-release-version.outputs.RELEASE_VERSION }}/g' go.mod
                 go mod tidy
                 go run . -minimal -clients glide -concurrentTasks 10 -port ${{ env.PORT }}
