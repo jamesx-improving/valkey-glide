@@ -4,9 +4,9 @@ env:
   TESTING_VERSION: "v0.0.9"
 
 on:
-  # push:
-  #   branches:
-  #     - "go/jamesx-cd"
+  push:
+    branches:
+      - "go/jamesx-cd"
   workflow_dispatch:
     inputs:
       version:
@@ -71,120 +71,138 @@ jobs:
         run: |
           echo "RELEASE_VERSION=${{ github.event.inputs.version || env.TESTING_VERSION }}" >> $GITHUB_OUTPUT
 
-  create-binaries:
-    needs: [load-platform-matrix, validate-release-version]
-    # TODO: change repository_owner to 'valkey-io' before merge to upstream
-    if: success() && github.repository_owner == 'jamesx-improving'
-    strategy:
-      fail-fast: false
-      matrix:
-        host: ${{ fromJson(needs.load-platform-matrix.outputs.PLATFORM_MATRIX)}}
-    runs-on: ${{ matrix.host.RUNNER}}
-    steps:
-      - name: Setup self-hosted runner access
-        run: |
-          GHA_HOME=/home/ubuntu/actions-runner/_work/valkey-glide
-          if [ -d $GHA_HOME ]; then
-            sudo chown -R $USER:$USER $GHA_HOME
-            sudo rm -rf $GHA_HOME
-            mkdir -p $GHA_HOME/valkey-glide
-          else
-            echo "No cleaning needed"
-          fi
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
-        with:
-          go-version: "^1.22.0"
-      - name: Install shared software dependencies
-        uses: ./.github/workflows/install-shared-dependencies
-        with:
-          os: ${{ matrix.host.OS }}
-          target: ${{ matrix.host.TARGET }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build Go client
-        working-directory: go
-        run: |
-          make install-build-tools
-          make build-glide-client
-          # TODO: move generation of protobuf and header file to a non-matrix step
-          make generate-protobuf
-      - name: Upload artifacts
-        continue-on-error: true
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.host.TARGET }}
-          path: |
-            go/target/release/libglide_rs.a
-            go/lib.h
-            go/protobuf/
+  # create-binaries:
+  #   needs: [load-platform-matrix, validate-release-version]
+  #   # TODO: change repository_owner to 'valkey-io' before merge to upstream
+  #   if: success() && github.repository_owner == 'jamesx-improving'
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       host: ${{ fromJson(needs.load-platform-matrix.outputs.PLATFORM_MATRIX)}}
+  #   runs-on: ${{ matrix.host.RUNNER}}
+  #   steps:
+  #     - name: Setup self-hosted runner access
+  #       run: |
+  #         GHA_HOME=/home/ubuntu/actions-runner/_work/valkey-glide
+  #         if [ -d $GHA_HOME ]; then
+  #           sudo chown -R $USER:$USER $GHA_HOME
+  #           sudo rm -rf $GHA_HOME
+  #           mkdir -p $GHA_HOME/valkey-glide
+  #         else
+  #           echo "No cleaning needed"
+  #         fi
+  #     - uses: actions/checkout@v4
+  #     - uses: actions/setup-go@v5
+  #       with:
+  #         go-version: "^1.22.0"
+  #     - name: Install shared software dependencies
+  #       uses: ./.github/workflows/install-shared-dependencies
+  #       with:
+  #         os: ${{ matrix.host.OS }}
+  #         target: ${{ matrix.host.TARGET }}
+  #         github-token: ${{ secrets.GITHUB_TOKEN }}
+  #     - name: Build Go client
+  #       working-directory: go
+  #       run: |
+  #         make install-build-tools
+  #         make build-glide-client
+  #         # TODO: move generation of protobuf and header file to a non-matrix step
+  #         make generate-protobuf
+  #     - name: Upload artifacts
+  #       continue-on-error: true
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: ${{ matrix.host.TARGET }}
+  #         path: |
+  #           go/target/release/libglide_rs.a
+  #           go/lib.h
+  #           go/protobuf/
 
-  commit-auto-gen-files-with-tag:
-    needs: [validate-release-version, create-binaries]
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
-        with:
-          path: artifacts
-      - name: Copy generated files to repo
-        run: |
-          cd artifacts
-          for dir in */; do
-            target_name=${dir%/}
-            mkdir -p $GITHUB_WORKSPACE/go/rustbin/${target_name}
-            cp ${target_name}/target/release/libglide_rs.a $GITHUB_WORKSPACE/go/rustbin/${target_name}/
-          done
-          # TODO: move generation of protobuf and header file to a non-matrix step
-          cd x86_64-unknown-linux-gnu
-          cp lib.h $GITHUB_WORKSPACE/go/
-          mkdir -p $GITHUB_WORKSPACE/go/protobuf
-          cp protobuf/* $GITHUB_WORKSPACE/go/protobuf/
-      - name: Commit and push tag
-        run: |
-          git config user.name github-actions
-          git config user.email github-actions@github.com
-          git add -f .
-          git commit -m "Automated commit from GitHub Actions"
-          git tag go/${{ needs.validate-release-version.outputs.RELEASE_VERSION}}
-          git push origin go/${{ needs.validate-release-version.outputs.RELEASE_VERSION}}
-          # TODO: change to valkey-io
-          GOPROXY=proxy.golang.org go list -m github.com/jamesx-improving/valkey-glide/go@${{ needs.validate-release-version.outputs.RELEASE_VERSION}}
+  # commit-auto-gen-files-with-tag:
+  #   needs: [validate-release-version, create-binaries]
+  #   runs-on: ubuntu-latest
+  #   permissions:
+  #     contents: write
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: actions/download-artifact@v4
+  #       with:
+  #         path: artifacts
+  #     - name: Copy generated files to repo
+  #       run: |
+  #         cd artifacts
+  #         for dir in */; do
+  #           target_name=${dir%/}
+  #           mkdir -p $GITHUB_WORKSPACE/go/rustbin/${target_name}
+  #           cp ${target_name}/target/release/libglide_rs.a $GITHUB_WORKSPACE/go/rustbin/${target_name}/
+  #         done
+  #         # TODO: move generation of protobuf and header file to a non-matrix step
+  #         cd x86_64-unknown-linux-gnu
+  #         cp lib.h $GITHUB_WORKSPACE/go/
+  #         mkdir -p $GITHUB_WORKSPACE/go/protobuf
+  #         cp protobuf/* $GITHUB_WORKSPACE/go/protobuf/
+  #     - name: Commit and push tag
+  #       run: |
+  #         git config user.name github-actions
+  #         git config user.email github-actions@github.com
+  #         git add -f .
+  #         git commit -m "Automated commit from GitHub Actions"
+  #         git tag go/${{ needs.validate-release-version.outputs.RELEASE_VERSION}}
+  #         git push origin go/${{ needs.validate-release-version.outputs.RELEASE_VERSION}}
+  #         # TODO: change to valkey-io
+  #         GOPROXY=proxy.golang.org go list -m github.com/jamesx-improving/valkey-glide/go@${{ needs.validate-release-version.outputs.RELEASE_VERSION}}
 
   extra-post-commit-test:
-    needs: [load-platform-matrix, validate-release-version, commit-auto-gen-files-with-tag]
-    strategy:
-      fail-fast: false
-      matrix:
-        host: ${{ fromJson(needs.load-platform-matrix.outputs.PLATFORM_MATRIX)}}
-    runs-on: ${{ matrix.host.RUNNER}}
-    steps:
-      - name: Setup self-hosted runner access
-        run: |
-          GHA_HOME=/home/ubuntu/actions-runner/_work/valkey-glide
-          if [ -d $GHA_HOME ]; then
-            sudo chown -R $USER:$USER $GHA_HOME
-            sudo rm -rf $GHA_HOME
-            mkdir -p $GHA_HOME/valkey-glide
-          else
-            echo "No cleaning needed"
-          fi
-      - uses: actions/checkout@v4
-        with:
-          ref: 'go/${{ needs.validate-release-version.outputs.RELEASE_VERSION}}'
-      - uses: actions/setup-go@v5
-        with:
-          go-version: "^1.22.0"
-      - name: Install shared software dependencies
-        uses: ./.github/workflows/install-shared-dependencies
-        with:
-          os: ${{ matrix.host.OS }}
-          target: ${{ matrix.host.TARGET }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          engine-version: "8.0"
-      - name: test go at tag
-        working-directory: go
-        run: |
-          make install-tools-go1.22.0
-          make -k unit-test integ-test
+        needs:
+            [
+                load-platform-matrix,
+                validate-release-version,
+                # commit-auto-gen-files-with-tag,
+            ]
+        strategy:
+            fail-fast: false
+            matrix:
+                host: ${{ fromJson(needs.load-platform-matrix.outputs.PLATFORM_MATRIX) }}
+        runs-on: ${{ matrix.host.RUNNER }}
+        steps:
+            - name: Setup self-hosted runner access
+              run: |
+                  GHA_HOME=/home/ubuntu/actions-runner/_work/valkey-glide
+                  if [ -d $GHA_HOME ]; then
+                    sudo chown -R $USER:$USER $GHA_HOME
+                    sudo rm -rf $GHA_HOME
+                    mkdir -p $GHA_HOME/valkey-glide
+                  else
+                    echo "No cleaning needed"
+                  fi
+            - uses: actions/checkout@v4
+              with:
+                  ref: "go/${{ needs.validate-release-version.outputs.RELEASE_VERSION }}"
+            - uses: actions/setup-go@v5
+              with:
+                  go-version: "^1.22.0"
+            - name: Install shared software dependencies
+              uses: ./.github/workflows/install-shared-dependencies
+              with:
+                  os: ${{ matrix.host.OS }}
+                  target: ${{ matrix.host.TARGET }}
+                  github-token: ${{ secrets.GITHUB_TOKEN }}
+                  engine-version: "8.0"
+            - name: Start standalone Valkey server
+              working-directory: utils
+              id: start-server
+              run: |
+                  PORT=$(python3 ./cluster_manager.py start -r 0 2>&1 | grep CLUSTER_NODES | cut -d = -f 2 | cut -d , -f 1 | cut -d : -f 2)
+                  echo "PORT=$PORT" >> $GITHUB_OUTPUT
+            - name: test newly released go client
+              env:
+                  PORT: ${{ steps.start-server.outputs.PORT }}
+              working-directory: go/benchmark
+              run: |
+                # change go/benchmark/go.mod on the fly
+                # remove replace (use published version)
+                sed -i '/replace github.com/valkey-io/valkey-glide/go/d' go.mod
+                # change depending glide version to newly released version
+                sed -i '/github.com/valkey-io/valkey-glide/go v0.0.0/s/github.com/valkey-io/valkey-glide/go ${{ needs.validate-release-version.outputs.RELEASE_VERSION }}/g' go.mod
+                go mod tidy
+                go run . -minimal -clients glide -concurrentTasks 10 -port ${{ env.PORT }}
