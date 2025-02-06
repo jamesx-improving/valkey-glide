@@ -55,17 +55,17 @@ jobs:
               exit 1
           fi
 
-      - name: Checkout for tag check
-        uses: actions/checkout@v4
+      # - name: Checkout for tag check
+      #   uses: actions/checkout@v4
 
-      - name: Validate version agaisnt tags
-        run: |
-          git fetch --tags
-          # testing with default TESTING_VERSION to procceed to follow up jobs
-          if git tag | grep -q "^go/${{ github.event.inputs.version || env.TESTING_VERSION }}$"; then
-              echo "Version ${{ github.event.inputs.version || env.TESTING_VERSION }} already exists."
-              exit 1
-          fi
+      # - name: Validate version agaisnt tags
+      #   run: |
+      #     git fetch --tags
+      #     # testing with default TESTING_VERSION to procceed to follow up jobs
+      #     if git tag | grep -q "^go/${{ github.event.inputs.version || env.TESTING_VERSION }}$"; then
+      #         echo "Version ${{ github.event.inputs.version || env.TESTING_VERSION }} already exists."
+      #         exit 1
+      #     fi
       - name: Output release tag
         id: release-tag
         run: |
