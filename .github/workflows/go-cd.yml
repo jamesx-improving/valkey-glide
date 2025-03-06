@@ -160,7 +160,7 @@ jobs:
               run: |
                   RELEASE_VERSION=${{ needs.validate-release-version.outputs.RELEASE_VERSION }}
                   echo "Releasing version detected in the commit job: $RELEASE_VERSION"
-                  if [[ $RELEASE_VERSION =~ ^test ]]
+                  if [[ $RELEASE_VERSION =~ ^test ]]; then
                       echo "Exiting commit job as test tag detected."
                       exit 1
                   fi
